@@ -1,0 +1,36 @@
+import { Navigate, Route, Routes } from 'react-router-dom';
+import ProtectedRoute from '../components/ProtectedRoute';
+import AppShell from '../layouts/AppShell';
+import LoginPage from '../pages/LoginPage';
+import RegisterPage from '../pages/RegisterPage';
+import DashboardPage from '../pages/DashboardPage';
+import ContactsPage from '../pages/ContactsPage';
+import ContactDetailPage from '../pages/ContactDetailPage';
+import ContactCreatePage from '../pages/ContactCreatePage';
+import ContactEditPage from '../pages/ContactEditPage';
+import NearbyContactsPage from '../pages/NearbyContactsPage';
+
+export default function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route
+        element={
+          <ProtectedRoute>
+            <AppShell />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/contacts" element={<ContactsPage />} />
+        <Route path="/contacts/new" element={<ContactCreatePage />} />
+        <Route path="/contacts/:id" element={<ContactDetailPage />} />
+        <Route path="/contacts/:id/edit" element={<ContactEditPage />} />
+        <Route path="/nearby" element={<NearbyContactsPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  );
+}
