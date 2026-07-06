@@ -7,7 +7,7 @@ Production-style MERN application with JWT auth, contact management, geocoding, 
 - Backend: Node.js, Express, MongoDB, Mongoose
 - Frontend: React 19, Vite, TailwindCSS
 - Auth: JWT, bcryptjs
-- Integrations: Geoapify Geocoding API, Google OAuth2, Google People API
+- Integrations: Geoapify Geocoding API, Google OAuth2, Google People API, OpenStreetMap + Leaflet (contact location map)
 
 ## Project Structure
 
@@ -62,14 +62,12 @@ GEOAPIFY_API_KEY=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GOOGLE_REDIRECT_URI=http://localhost:5000/api/google/callback
-GOOGLE_MAPS_EMBED_API_KEY=
 ```
 
 ## Frontend Environment Variables
 
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api
-VITE_GOOGLE_MAPS_EMBED_API_KEY=
 ```
 
 ## Geoapify Setup
@@ -143,3 +141,4 @@ npm run dev
 - Google contact sync upserts contacts by `owner + googleId`.
 - Nearby search uses MongoDB geospatial queries on a `2dsphere` index.
 - The frontend attaches JWT automatically through a centralized Axios client.
+- Contact location maps use OpenStreetMap tiles via Leaflet — no API key required.
