@@ -35,6 +35,9 @@ export default function AppShell() {
               ['/contacts', 'Contacts'],
               ['/contacts/new', 'Create Contact'],
               ['/nearby', 'Nearby'],
+              ['/recent', 'Recently'],
+              ['/groups', 'Groups'],
+              ['/blacklist', 'Blacklist'],
             ].map(([to, label]) => (
               <NavLink
                 key={to}

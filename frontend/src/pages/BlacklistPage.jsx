@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { contactsApi } from '../api/contacts';
 import SearchBar from '../components/SearchBar';
 import ContactTable from '../components/ContactTable';
 import Pagination from '../components/Pagination';
 import Button from '../components/Button';
 
-export default function ContactsPage() {
+export default function BlacklistPage() {
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -17,6 +16,7 @@ export default function ContactsPage() {
       search,
       page,
       limit: 10,
+      blacklisted: 'true',
       sortBy: 'createdAt',
       sortOrder: 'desc',
     });
@@ -29,13 +29,13 @@ export default function ContactsPage() {
 
   return (
     <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold text-white">Blacklist</h1>
+        <p className="text-sm text-slate-400">Contacts you have blocked.</p>
+      </div>
       <div className="flex flex-wrap items-center gap-3">
         <div className="min-w-64 flex-1">
-          <SearchBar
-            value={query}
-            onChange={setQuery}
-            placeholder="Search name, email, phone"
-          />
+          <SearchBar value={query} onChange={setQuery} placeholder="Search name, email, phone" />
         </div>
         <Button
           onClick={() => {
@@ -45,9 +45,6 @@ export default function ContactsPage() {
         >
           Search
         </Button>
-        <Link to="/contacts/new" className="rounded-xl bg-emerald-400 px-4 py-3 text-sm font-medium text-slate-950">
-          New Contact
-        </Link>
       </div>
       <ContactTable
         contacts={data.contacts}

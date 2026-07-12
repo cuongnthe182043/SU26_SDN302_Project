@@ -6,6 +6,7 @@ const contactRoutes = require('./routes/contact.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const googleRoutes = require('./routes/google.routes');
 const uploadRoutes = require('./routes/upload.routes');
+const groupRoutes = require('./routes/group.routes');
 const { errorHandler, notFound } = require('./middleware/error.middleware');
 const { uploadDir } = require('./middleware/upload.middleware');
 
@@ -27,6 +28,7 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/google', googleRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/groups', groupRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -10,6 +10,10 @@ import ContactDetailPage from '../pages/ContactDetailPage';
 import ContactCreatePage from '../pages/ContactCreatePage';
 import ContactEditPage from '../pages/ContactEditPage';
 import NearbyContactsPage from '../pages/NearbyContactsPage';
+import BlacklistPage from '../pages/BlacklistPage';
+import GroupsPage from '../pages/GroupsPage';
+import GroupDetailPage from '../pages/GroupDetailPage';
+import RecentPage from '../pages/RecentPage';
 
 export default function AppRoutes() {
   return (
@@ -30,6 +34,10 @@ export default function AppRoutes() {
         <Route path="/contacts/:id" element={<ContactDetailPage />} />
         <Route path="/contacts/:id/edit" element={<ContactEditPage />} />
         <Route path="/nearby" element={<NearbyContactsPage />} />
+        <Route path="/blacklist" element={<BlacklistPage />} />
+        <Route path="/groups" element={<GroupsPage />} />
+        <Route path="/groups/:id" element={<GroupDetailPage />} />
+        <Route path="/recent" element={<RecentPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Input from './Input';
 import Button from './Button';
 import AddressAutocomplete from './AddressAutocomplete';
 import { uploadApi } from '../api/upload';
+import { groupsApi } from '../api/groups';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^[+()0-9.\-\s]{6,20}$/;
@@ -11,6 +12,19 @@ export default function ContactForm({ initialValues, onSubmit, submitLabel }) {
   const [form, setForm] = useState(initialValues);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [groups, setGroups] = useState([]);
+
+  useEffect(() => {
+    groupsApi.list().then(({ data }) => setGroups(data.groups));
+  }, []);
+
+  const toggleGroup = (groupId) =>
+    setForm((prev) => ({
+      ...prev,
+      groups: prev.groups.includes(groupId)
+        ? prev.groups.filter((id) => id !== groupId)
+        : [...prev.groups, groupId],
+    }));
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
@@ -73,6 +87,31 @@ export default function ContactForm({ initialValues, onSubmit, submitLabel }) {
         <input type="checkbox" checked={form.favorite} onChange={(e) => update('favorite', e.target.checked)} />
         Favorite
       </label>
+      <label className="flex items-center gap-3 text-sm text-slate-300">
+        <input
+          type="checkbox"
+          checked={form.isBlacklisted}
+          onChange={(e) => update('isBlacklisted', e.target.checked)}
+        />
+        Blacklisted
+      </label>
+      {groups.length > 0 ? (
+        <div className="space-y-2 text-sm text-slate-300">
+          <span>Groups</span>
+          <div className="flex flex-wrap gap-3">
+            {groups.map((group) => (
+              <label key={group._id} className="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2">
+                <input
+                  type="checkbox"
+                  checked={form.groups.includes(group._id)}
+                  onChange={() => toggleGroup(group._id)}
+                />
+                {group.name}
+              </label>
+            ))}
+          </div>
+        </div>
+      ) : null}
       <Button type="submit" disabled={uploading}>
         {uploading ? 'Uploading...' : submitLabel}
       </Button>

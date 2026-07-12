@@ -7,6 +7,8 @@ export const emptyContactForm = {
   note: '',
   avatarUrl: '',
   favorite: false,
+  isBlacklisted: false,
+  groups: [],
 };
 
 export const mapContactToForm = (contact) => ({
@@ -18,4 +20,6 @@ export const mapContactToForm = (contact) => ({
   note: contact.note || '',
   avatarUrl: contact.avatarUrl || '',
   favorite: !!contact.favorite,
+  isBlacklisted: !!contact.isBlacklisted,
+  groups: (contact.groups || []).map((group) => (typeof group === 'string' ? group : group._id)),
 });

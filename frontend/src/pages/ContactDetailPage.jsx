@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
-import { CakeIcon, MapPinIcon, PencilSquareIcon, PhoneIcon, StarIcon } from '@heroicons/react/24/outline';
+import { CakeIcon, MapPinIcon, NoSymbolIcon, PencilSquareIcon, PhoneIcon, StarIcon } from '@heroicons/react/24/outline';
 import { contactsApi } from '../api/contacts';
 import Button from '../components/Button';
 import MapEmbed from '../components/MapEmbed';
+import NotesPanel from '../components/NotesPanel';
 import { formatDate } from '../utils/formatDate';
 
 export default function ContactDetailPage() {
@@ -23,8 +24,18 @@ export default function ContactDetailPage() {
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-semibold text-white">{contact.fullName}</h1>
           {contact.favorite ? <StarSolid className="h-6 w-6 text-amber-300" /> : null}
+          {contact.isBlacklisted ? <NoSymbolIcon className="h-6 w-6 text-rose-400" title="Blacklisted" /> : null}
         </div>
         <p className="mt-2 text-slate-300">{contact.email || contact.phone || 'No contact details'}</p>
+        {contact.groups?.length ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {contact.groups.map((group) => (
+              <span key={group._id} className="rounded-full bg-white/10 px-3 py-1 text-xs text-slate-300">
+                {group.name}
+              </span>
+            ))}
+          </div>
+        ) : null}
         <div className="mt-4 flex gap-3">
           <Link
             to={`/contacts/${contact._id}/edit`}
@@ -41,6 +52,16 @@ export default function ContactDetailPage() {
             }}
           >
             <StarIcon className="mr-2 h-4 w-4" /> Toggle Favorite
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={async () => {
+              await contactsApi.toggleBlacklist(contact._id);
+              const { data } = await contactsApi.get(contact._id);
+              setContact(data.contact);
+            }}
+          >
+            <NoSymbolIcon className="mr-2 h-4 w-4" /> Toggle Blacklist
           </Button>
         </div>
       </div>
@@ -63,6 +84,10 @@ export default function ContactDetailPage() {
         <div className="sm:col-span-2">
           <span className="text-slate-500">Notes:</span> {contact.note || '-'}
         </div>
+      </div>
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+        <h2 className="mb-4 text-lg font-semibold text-white">Notes</h2>
+        <NotesPanel contactId={contact._id} />
       </div>
     </div>
   );

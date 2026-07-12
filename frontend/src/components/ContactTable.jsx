@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
-import { EyeIcon, MapPinIcon, StarIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, MapPinIcon, NoSymbolIcon, StarIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Button from './Button';
 
 export default function ContactTable({
   contacts,
   onDelete,
   onToggleFavorite,
+  onToggleBlacklist,
   showActions = true,
 }) {
   if (contacts.length === 0) {
@@ -37,11 +38,26 @@ export default function ContactTable({
                   {contact.favorite ? (
                     <StarSolid className="h-4 w-4 shrink-0 text-amber-300" />
                   ) : null}
+                  {contact.isBlacklisted ? (
+                    <NoSymbolIcon className="h-4 w-4 shrink-0 text-rose-400" title="Blacklisted" />
+                  ) : null}
                   <span>{contact.fullName}</span>
                   {contact.location?.coordinates ? (
                     <MapPinIcon className="h-4 w-4 shrink-0 text-emerald-300" title="Location on map" />
                   ) : null}
                 </div>
+                {contact.groups?.length ? (
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {contact.groups.map((group) => (
+                      <span
+                        key={group._id}
+                        className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-slate-300"
+                      >
+                        {group.name}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </td>
               <td className="px-4 py-3 text-slate-300">{contact.email || '-'}</td>
               <td className="px-4 py-3 text-slate-300">{contact.phone || '-'}</td>
@@ -62,6 +78,11 @@ export default function ContactTable({
                     <Button variant="secondary" onClick={() => onToggleFavorite(contact._id)}>
                       <StarIcon className="h-4 w-4" />
                     </Button>
+                    {onToggleBlacklist ? (
+                      <Button variant="secondary" onClick={() => onToggleBlacklist(contact._id)}>
+                        <NoSymbolIcon className="h-4 w-4" />
+                      </Button>
+                    ) : null}
                     <Button variant="secondary" onClick={() => onDelete(contact._id)}>
                       <TrashIcon className="h-4 w-4" />
                     </Button>

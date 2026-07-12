@@ -1,4 +1,5 @@
 const Contact = require('../models/Contact');
+const Note = require('../models/Note');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const { geocodeAddress, suggestAddresses } = require('../services/geocoding.service');
@@ -38,9 +39,14 @@ const listContacts = asyncHandler(async (req, res) => {
   const sort = buildSort(req.query.sortBy, req.query.sortOrder);
 
   const filter = { owner: req.user._id, ...buildSearchQuery(search) };
+  if (req.query.blacklisted === 'true') filter.isBlacklisted = true;
+  else if (req.query.blacklisted === 'false') filter.isBlacklisted = false;
+  if (req.query.group) filter.groups = req.query.group;
+
   const [total, contacts] = await Promise.all([
     Contact.countDocuments(filter),
     Contact.find(filter)
+      .populate('groups', 'name color')
       .sort(sort)
       .skip((page - 1) * limit)
       .limit(limit),
@@ -58,9 +64,28 @@ const listContacts = asyncHandler(async (req, res) => {
 });
 
 const getContact = asyncHandler(async (req, res) => {
-  const contact = await Contact.findOne({ _id: req.params.id, owner: req.user._id });
+  const contact = await Contact.findOneAndUpdate(
+    { _id: req.params.id, owner: req.user._id },
+    { $set: { lastViewedAt: new Date() } },
+    { new: true }
+  ).populate('groups', 'name color');
   if (!contact) throw new AppError('Contact not found', 404);
   res.json({ contact });
+});
+
+const recentContacts = asyncHandler(async (req, res) => {
+  const type = req.query.type === 'added' ? 'added' : 'viewed';
+  const limit = Math.min(Math.max(parseInt(req.query.limit || '10', 10), 1), 50);
+
+  const filter = { owner: req.user._id };
+  if (type === 'viewed') filter.lastViewedAt = { $exists: true };
+
+  const contacts = await Contact.find(filter)
+    .populate('groups', 'name color')
+    .sort({ [type === 'added' ? 'createdAt' : 'lastViewedAt']: -1 })
+    .limit(limit);
+
+  res.json({ contacts });
 });
 
 const createContact = asyncHandler(async (req, res) => {
@@ -74,6 +99,8 @@ const createContact = asyncHandler(async (req, res) => {
     note: req.body.note,
     avatarUrl: req.body.avatarUrl,
     favorite: parseBool(req.body.favorite),
+    isBlacklisted: parseBool(req.body.isBlacklisted),
+    groups: Array.isArray(req.body.groups) ? req.body.groups : undefined,
     source: req.body.source === 'google' ? 'google' : 'local',
     googleId: req.body.googleId,
   };
@@ -95,6 +122,10 @@ const updateContact = asyncHandler(async (req, res) => {
   });
 
   if (req.body.favorite !== undefined) updates.favorite = parseBool(req.body.favorite, contact.favorite);
+  if (req.body.isBlacklisted !== undefined) {
+    updates.isBlacklisted = parseBool(req.body.isBlacklisted, contact.isBlacklisted);
+  }
+  if (Array.isArray(req.body.groups)) updates.groups = req.body.groups;
   if (req.body.birthday !== undefined) updates.birthday = req.body.birthday || null;
 
   if (req.body.address !== undefined) {
@@ -106,12 +137,14 @@ const updateContact = asyncHandler(async (req, res) => {
     contact.location = undefined;
   }
   await contact.save();
+  await contact.populate('groups', 'name color');
   res.json({ contact });
 });
 
 const deleteContact = asyncHandler(async (req, res) => {
   const contact = await Contact.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
   if (!contact) throw new AppError('Contact not found', 404);
+  await Note.deleteMany({ contact: contact._id });
   res.json({ message: 'Contact deleted' });
 });
 
@@ -119,6 +152,14 @@ const toggleFavorite = asyncHandler(async (req, res) => {
   const contact = await Contact.findOne({ _id: req.params.id, owner: req.user._id });
   if (!contact) throw new AppError('Contact not found', 404);
   contact.favorite = !contact.favorite;
+  await contact.save();
+  res.json({ contact });
+});
+
+const toggleBlacklist = asyncHandler(async (req, res) => {
+  const contact = await Contact.findOne({ _id: req.params.id, owner: req.user._id });
+  if (!contact) throw new AppError('Contact not found', 404);
+  contact.isBlacklisted = !contact.isBlacklisted;
   await contact.save();
   res.json({ contact });
 });
@@ -159,6 +200,8 @@ module.exports = {
   updateContact,
   deleteContact,
   toggleFavorite,
+  toggleBlacklist,
+  recentContacts,
   nearbyContacts,
   addressSuggestions,
 };
