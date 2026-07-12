@@ -6,7 +6,7 @@ Production-style MERN application with JWT auth, contact management, geocoding, 
 
 - Backend: Node.js, Express, MongoDB, Mongoose
 - Frontend: React 19, Vite, TailwindCSS
-- Auth: JWT, bcryptjs
+- Auth: JWT, bcryptjs, Google Sign-In (Google Identity Services)
 - Integrations: Geoapify Geocoding API, Google OAuth2, Google People API, OpenStreetMap + Leaflet (contact location map)
 
 ## Project Structure
@@ -68,6 +68,7 @@ GOOGLE_REDIRECT_URI=http://localhost:5000/api/google/callback
 
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api
+VITE_GOOGLE_CLIENT_ID=
 ```
 
 ## Geoapify Setup
@@ -93,6 +94,15 @@ The backend geocodes contact addresses on create and update.
 3. Use the dashboard action to connect Google.
 4. After authorization, use the sync action to import contacts.
 
+## Google Sign-In (Login/Register) Setup
+
+This is separate from the Google People sync above: it lets a user log in or register using their Google identity, using the same OAuth client as a Google Identity Services ("Sign in with Google") button.
+
+1. In the same Google Cloud OAuth client (Web application type), add an **Authorized JavaScript origin** for the frontend URL, e.g. `http://localhost:5173` (and your production URL later). This is separate from the "Authorized redirect URIs" used by the People sync flow.
+2. Set `VITE_GOOGLE_CLIENT_ID` in `frontend/.env` to the same value as `GOOGLE_CLIENT_ID` in `backend/.env` (client IDs are not secret).
+3. The backend verifies the Google ID token server-side with `google-auth-library`, using `GOOGLE_CLIENT_ID` as the expected audience — no client secret is needed for this flow.
+4. If a Google account's email matches an existing local account, the accounts are linked (`googleId` is attached); otherwise a new user is created with no password.
+
 ## Run Commands
 
 ### Backend
@@ -115,6 +125,7 @@ npm run dev
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
+- `POST /api/auth/google`
 - `GET /api/auth/me`
 
 ### Contacts

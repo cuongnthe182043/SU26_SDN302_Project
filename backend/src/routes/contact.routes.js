@@ -3,6 +3,7 @@ const { body } = require('express-validator');
 const { protect } = require('../middleware/auth.middleware');
 const { validateRequest } = require('../middleware/validation.middleware');
 const {
+  addressSuggestions,
   createContact,
   deleteContact,
   getContact,
@@ -15,6 +16,7 @@ const {
 const router = express.Router();
 
 router.get('/nearby', protect, nearbyContacts);
+router.get('/address-suggestions', protect, addressSuggestions);
 router.get('/', protect, listContacts);
 router.get('/:id', protect, getContact);
 router.post(

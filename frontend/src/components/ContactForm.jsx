@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Input from './Input';
 import Button from './Button';
+import AddressAutocomplete from './AddressAutocomplete';
 import { uploadApi } from '../api/upload';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,7 +36,7 @@ export default function ContactForm({ initialValues, onSubmit, submitLabel }) {
       <Input label="Full Name" value={form.fullName} onChange={(e) => update('fullName', e.target.value)} required />
       <Input label="Email" type="email" value={form.email} onChange={(e) => update('email', e.target.value)} />
       <Input label="Phone" value={form.phone} onChange={(e) => update('phone', e.target.value)} />
-      <Input label="Address" value={form.address} onChange={(e) => update('address', e.target.value)} />
+      <AddressAutocomplete label="Address" value={form.address} onChange={(value) => update('address', value)} />
       <Input label="Birthday" type="date" value={form.birthday} onChange={(e) => update('birthday', e.target.value)} />
       <label className="block space-y-2 text-sm text-slate-300">
         <span>Avatar Upload</span>

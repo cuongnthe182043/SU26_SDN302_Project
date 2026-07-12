@@ -24,4 +24,26 @@ const geocodeAddress = async (address) => {
   return { longitude: lon, latitude: lat };
 };
 
-module.exports = { geocodeAddress };
+const suggestAddresses = async (text) => {
+  if (!text || !process.env.GEOAPIFY_API_KEY) {
+    return [];
+  }
+
+  const response = await axios.get('https://api.geoapify.com/v1/geocode/autocomplete', {
+    params: {
+      text,
+      apiKey: process.env.GEOAPIFY_API_KEY,
+      limit: 5,
+    },
+  });
+
+  return (response.data?.features || [])
+    .map((feature) => ({
+      formatted: feature.properties?.formatted,
+      longitude: feature.properties?.lon,
+      latitude: feature.properties?.lat,
+    }))
+    .filter((item) => item.formatted && typeof item.longitude === 'number' && typeof item.latitude === 'number');
+};
+
+module.exports = { geocodeAddress, suggestAddresses };

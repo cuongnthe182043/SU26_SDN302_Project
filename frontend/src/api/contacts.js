@@ -8,4 +8,5 @@ export const contactsApi = {
   remove: (id) => client.delete(`/contacts/${id}`),
   toggleFavorite: (id) => client.patch(`/contacts/${id}/favorite`),
   nearby: (params) => client.get('/contacts/nearby', { params }),
+  suggestAddress: (text) => client.get('/contacts/address-suggestions', { params: { text } }),
 };

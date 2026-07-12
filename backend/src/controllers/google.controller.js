@@ -37,7 +37,7 @@ const callback = asyncHandler(async (req, res) => {
   user.googleRefreshToken = tokens.refresh_token || user.googleRefreshToken;
   await user.save();
 
-  const redirectUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?google=connected`;
+  const redirectUrl = `${process.env.FRONTEND_URL || 'http://localhost:5175'}/dashboard?google=connected`;
   res.redirect(redirectUrl);
 });
 

@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
+import { EyeIcon, MapPinIcon, StarIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Button from './Button';
 
 export default function ContactTable({
@@ -7,6 +9,14 @@ export default function ContactTable({
   onToggleFavorite,
   showActions = true,
 }) {
+  if (contacts.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-10 text-center text-sm text-slate-400">
+        No contacts to show.
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
       <table className="min-w-full divide-y divide-white/10 text-left text-sm">
@@ -21,25 +31,39 @@ export default function ContactTable({
         </thead>
         <tbody className="divide-y divide-white/10">
           {contacts.map((contact) => (
-            <tr key={contact._id}>
+            <tr key={contact._id} className="transition hover:bg-white/5">
               <td className="px-4 py-3 text-white">
-                {contact.fullName}{' '}
-                {contact.favorite ? <span className="ml-2 text-amber-300">★</span> : null}
+                <div className="flex items-center gap-2">
+                  {contact.favorite ? (
+                    <StarSolid className="h-4 w-4 shrink-0 text-amber-300" />
+                  ) : null}
+                  <span>{contact.fullName}</span>
+                  {contact.location?.coordinates ? (
+                    <MapPinIcon className="h-4 w-4 shrink-0 text-emerald-300" title="Location on map" />
+                  ) : null}
+                </div>
               </td>
               <td className="px-4 py-3 text-slate-300">{contact.email || '-'}</td>
               <td className="px-4 py-3 text-slate-300">{contact.phone || '-'}</td>
-              <td className="px-4 py-3 text-slate-300">{contact.source}</td>
+              <td className="px-4 py-3">
+                <span className="rounded-full bg-white/10 px-2 py-1 text-xs uppercase tracking-wide text-slate-300">
+                  {contact.source}
+                </span>
+              </td>
               {showActions ? (
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-2">
-                    <Link className="rounded-xl bg-white/5 px-3 py-2 text-slate-100" to={`/contacts/${contact._id}`}>
-                      View
+                    <Link
+                      className="inline-flex items-center gap-1 rounded-xl bg-white/5 px-3 py-2 text-slate-100 hover:bg-white/10"
+                      to={`/contacts/${contact._id}`}
+                    >
+                      <EyeIcon className="h-4 w-4" /> View
                     </Link>
                     <Button variant="secondary" onClick={() => onToggleFavorite(contact._id)}>
-                      Favorite
+                      <StarIcon className="h-4 w-4" />
                     </Button>
                     <Button variant="secondary" onClick={() => onDelete(contact._id)}>
-                      Delete
+                      <TrashIcon className="h-4 w-4" />
                     </Button>
                   </div>
                 </td>

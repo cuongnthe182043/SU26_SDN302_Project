@@ -1,7 +1,7 @@
 const Contact = require('../models/Contact');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
-const { geocodeAddress } = require('../services/geocoding.service');
+const { geocodeAddress, suggestAddresses } = require('../services/geocoding.service');
 
 const parseBool = (value, fallback = false) => {
   if (value === undefined || value === null || value === '') return fallback;
@@ -123,6 +123,13 @@ const toggleFavorite = asyncHandler(async (req, res) => {
   res.json({ contact });
 });
 
+const addressSuggestions = asyncHandler(async (req, res) => {
+  const text = (req.query.text || '').trim();
+  if (!text) return res.json({ suggestions: [] });
+  const suggestions = await suggestAddresses(text);
+  res.json({ suggestions });
+});
+
 const nearbyContacts = asyncHandler(async (req, res) => {
   const lat = Number(req.query.lat);
   const lng = Number(req.query.lng);
@@ -153,4 +160,5 @@ module.exports = {
   deleteContact,
   toggleFavorite,
   nearbyContacts,
+  addressSuggestions,
 };
