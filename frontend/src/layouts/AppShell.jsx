@@ -28,12 +28,10 @@ export default function AppShell() {
         </div>
       </header>
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[220px_1fr]">
-        <aside className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <aside className="rounded-2xl border border-white/10 bg-slate-900 p-4">
           <nav className="grid gap-2">
             {[
               ['/dashboard', 'Dashboard'],
-              ['/contacts', 'Contacts'],
-              ['/contacts/new', 'Create Contact'],
               ['/nearby', 'Nearby'],
               ['/recent', 'Recently'],
               ['/groups', 'Groups'],
@@ -43,7 +41,7 @@ export default function AppShell() {
                 key={to}
                 to={to}
                 className={({ isActive }) =>
-                  `rounded-xl px-3 py-2 text-sm ${isActive ? 'bg-emerald-400 text-slate-950' : 'text-slate-300 hover:bg-white/5'}`
+                  `rounded-xl px-3 py-2 text-sm ${isActive ? 'bg-emerald-400 text-slate-950' : 'text-slate-300 hover:bg-slate-800'}`
                 }
               >
                 {label}

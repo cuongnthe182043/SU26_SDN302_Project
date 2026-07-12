@@ -20,7 +20,7 @@ export default function ContactDetailPage() {
 
   return (
     <div className="grid gap-6">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+      <div className="rounded-2xl border border-white/10 bg-slate-900 p-6">
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-semibold text-white">{contact.fullName}</h1>
           {contact.favorite ? <StarSolid className="h-6 w-6 text-amber-300" /> : null}
@@ -30,7 +30,7 @@ export default function ContactDetailPage() {
         {contact.groups?.length ? (
           <div className="mt-3 flex flex-wrap gap-2">
             {contact.groups.map((group) => (
-              <span key={group._id} className="rounded-full bg-white/10 px-3 py-1 text-xs text-slate-300">
+              <span key={group._id} className="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300">
                 {group.name}
               </span>
             ))}
@@ -65,13 +65,13 @@ export default function ContactDetailPage() {
           </Button>
         </div>
       </div>
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+      <div className="rounded-2xl border border-white/10 bg-slate-900 p-6">
         <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
           <MapPinIcon className="h-5 w-5 text-emerald-300" /> Location
         </h2>
         <MapEmbed contact={contact} />
       </div>
-      <div className="grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-6 text-slate-300 sm:grid-cols-2">
+      <div className="grid gap-3 rounded-2xl border border-white/10 bg-slate-900 p-6 text-slate-300 sm:grid-cols-2">
         <div className="flex items-center gap-2">
           <PhoneIcon className="h-4 w-4 text-slate-500" /> {contact.phone || '-'}
         </div>
@@ -85,7 +85,7 @@ export default function ContactDetailPage() {
           <span className="text-slate-500">Notes:</span> {contact.note || '-'}
         </div>
       </div>
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+      <div className="rounded-2xl border border-white/10 bg-slate-900 p-6">
         <h2 className="mb-4 text-lg font-semibold text-white">Notes</h2>
         <NotesPanel contactId={contact._id} />
       </div>

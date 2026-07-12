@@ -24,7 +24,7 @@ export default function GroupsPage() {
         <p className="text-sm text-slate-400">Organize your contacts into groups.</p>
       </div>
       <form
-        className="flex flex-wrap items-end gap-3 rounded-2xl border border-white/10 bg-white/5 p-6"
+        className="flex flex-wrap items-end gap-3 rounded-2xl border border-white/10 bg-slate-900 p-6"
         onSubmit={async (e) => {
           e.preventDefault();
           setError('');
@@ -47,7 +47,7 @@ export default function GroupsPage() {
             type="color"
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            className="h-11 w-16 rounded-xl border border-white/10 bg-slate-900/80"
+            className="h-11 w-16 rounded-xl border border-white/10 bg-slate-950"
           />
         </label>
         <Button type="submit">Create Group</Button>
@@ -55,7 +55,7 @@ export default function GroupsPage() {
       {error ? <div className="rounded-xl border border-rose-400/40 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">{error}</div> : null}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {groups.map((group) => (
-          <div key={group._id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div key={group._id} className="rounded-2xl border border-white/10 bg-slate-900 p-4">
             <div className="flex items-center justify-between">
               <Link to={`/groups/${group._id}`} className="flex items-center gap-2 text-white hover:underline">
                 <span className="h-3 w-3 rounded-full" style={{ backgroundColor: group.color }} />
@@ -75,7 +75,7 @@ export default function GroupsPage() {
           </div>
         ))}
         {groups.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-10 text-center text-sm text-slate-400 sm:col-span-2 lg:col-span-3">
+          <div className="rounded-2xl border border-dashed border-white/15 bg-slate-900 p-10 text-center text-sm text-slate-400 sm:col-span-2 lg:col-span-3">
             No groups yet.
           </div>
         ) : null}

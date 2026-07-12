@@ -6,7 +6,7 @@ export default function MapEmbed({ contact }) {
 
   if (lat === undefined || lng === undefined) {
     return (
-      <div className="flex h-72 w-full items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/5 text-sm text-slate-400">
+      <div className="flex h-72 w-full items-center justify-center rounded-2xl border border-dashed border-white/15 bg-slate-900 text-sm text-slate-400">
         No location available for this contact
       </div>
     );

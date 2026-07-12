@@ -8,10 +8,11 @@ import { groupsApi } from '../api/groups';
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^[+()0-9.\-\s]{6,20}$/;
 
-export default function ContactForm({ initialValues, onSubmit, submitLabel }) {
+export default function ContactForm({ initialValues, onSubmit, submitLabel, bare = false }) {
   const [form, setForm] = useState(initialValues);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [groups, setGroups] = useState([]);
 
   useEffect(() => {
@@ -37,13 +38,23 @@ export default function ContactForm({ initialValues, onSubmit, submitLabel }) {
 
   return (
     <form
-      className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-6"
+      className={bare ? 'grid gap-4' : 'grid gap-4 rounded-2xl border border-white/10 bg-slate-900 p-6'}
       onSubmit={async (e) => {
         e.preventDefault();
         const message = validate();
-        setError(message);
-        if (message) return;
-        await onSubmit(form);
+        if (message) {
+          setError(message);
+          return;
+        }
+        setError('');
+        setSubmitting(true);
+        try {
+          await onSubmit(form);
+        } catch (submitError) {
+          setError(submitError.response?.data?.message || 'Failed to save contact. Please try again.');
+        } finally {
+          setSubmitting(false);
+        }
       }}
     >
       {error ? <div className="rounded-xl border border-rose-400/40 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">{error}</div> : null}
@@ -71,13 +82,13 @@ export default function ContactForm({ initialValues, onSubmit, submitLabel }) {
               setUploading(false);
             }
           }}
-          className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-4 py-3 text-slate-300"
+          className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-slate-300"
         />
       </label>
       <label className="block space-y-2 text-sm text-slate-300">
         <span>Note</span>
         <textarea
-          className="min-h-28 w-full rounded-xl border border-white/10 bg-slate-900/80 px-4 py-3 outline-none focus:border-emerald-400"
+          className="min-h-28 w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 outline-none focus:border-emerald-400"
           value={form.note}
           onChange={(e) => update('note', e.target.value)}
         />
@@ -100,7 +111,7 @@ export default function ContactForm({ initialValues, onSubmit, submitLabel }) {
           <span>Groups</span>
           <div className="flex flex-wrap gap-3">
             {groups.map((group) => (
-              <label key={group._id} className="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2">
+              <label key={group._id} className="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-800 px-3 py-2">
                 <input
                   type="checkbox"
                   checked={form.groups.includes(group._id)}
@@ -112,8 +123,8 @@ export default function ContactForm({ initialValues, onSubmit, submitLabel }) {
           </div>
         </div>
       ) : null}
-      <Button type="submit" disabled={uploading}>
-        {uploading ? 'Uploading...' : submitLabel}
+      <Button type="submit" disabled={uploading || submitting}>
+        {uploading ? 'Uploading...' : submitting ? 'Saving...' : submitLabel}
       </Button>
     </form>
   );

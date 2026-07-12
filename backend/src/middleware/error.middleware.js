@@ -13,7 +13,14 @@ const errorHandler = (err, _req, res, _next) => {
   }
 
   if (err.code === 11000) {
-    return res.status(409).json({ message: 'Duplicate resource' });
+    const duplicateMessages = {
+      phone: 'A contact with this phone number already exists',
+      googleId: 'This Google contact has already been imported',
+      email: 'A user with this email already exists',
+      name: 'A group with this name already exists',
+    };
+    const field = Object.keys(err.keyPattern || {}).find((key) => key !== 'owner');
+    return res.status(409).json({ message: duplicateMessages[field] || 'Duplicate resource' });
   }
 
   res.status(statusCode).json(response);

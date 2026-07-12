@@ -63,7 +63,7 @@ export default function NearbyContactsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 md:grid-cols-4">
+      <div className="grid gap-4 rounded-2xl border border-white/10 bg-slate-900 p-6 md:grid-cols-4">
         <Input label="Latitude" value={coords.lat} onChange={(e) => setCoords({ ...coords, lat: e.target.value })} />
         <Input label="Longitude" value={coords.lng} onChange={(e) => setCoords({ ...coords, lng: e.target.value })} />
         <Input label="Radius (km)" value={coords.radius} onChange={(e) => setCoords({ ...coords, radius: e.target.value })} />
@@ -81,7 +81,7 @@ export default function NearbyContactsPage() {
       </div>
 
       {searched && markers.length > 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+        <div className="rounded-2xl border border-white/10 bg-slate-900 p-6">
           <h2 className="mb-4 text-lg font-semibold text-white">
             {markers.length} contact{markers.length === 1 ? '' : 's'} on the map
           </h2>
@@ -96,7 +96,7 @@ export default function NearbyContactsPage() {
       ) : null}
 
       {searched && contacts.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-6 text-center text-sm text-slate-400">
+        <div className="rounded-2xl border border-dashed border-white/15 bg-slate-900 p-6 text-center text-sm text-slate-400">
           No contacts found within {coords.radius}km of this location.
         </div>
       ) : null}

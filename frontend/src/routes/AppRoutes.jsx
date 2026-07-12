@@ -5,9 +5,7 @@ import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import DashboardPage from '../pages/DashboardPage';
-import ContactsPage from '../pages/ContactsPage';
 import ContactDetailPage from '../pages/ContactDetailPage';
-import ContactCreatePage from '../pages/ContactCreatePage';
 import ContactEditPage from '../pages/ContactEditPage';
 import NearbyContactsPage from '../pages/NearbyContactsPage';
 import BlacklistPage from '../pages/BlacklistPage';
@@ -29,8 +27,6 @@ export default function AppRoutes() {
         }
       >
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/contacts" element={<ContactsPage />} />
-        <Route path="/contacts/new" element={<ContactCreatePage />} />
         <Route path="/contacts/:id" element={<ContactDetailPage />} />
         <Route path="/contacts/:id/edit" element={<ContactEditPage />} />
         <Route path="/nearby" element={<NearbyContactsPage />} />

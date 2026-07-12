@@ -22,11 +22,11 @@ export default function NotesPanel({ contactId }) {
           <p className="text-sm text-slate-400">No notes yet.</p>
         ) : (
           notes.map((note) => (
-            <div key={note._id} className="rounded-xl border border-white/10 bg-slate-900/60 p-4">
+            <div key={note._id} className="rounded-xl border border-white/10 bg-slate-800 p-4">
               {editingId === note._id ? (
                 <div className="grid gap-2">
                   <textarea
-                    className="min-h-20 w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-400"
+                    className="min-h-20 w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-400"
                     value={editingBody}
                     onChange={(e) => setEditingBody(e.target.value)}
                   />
@@ -81,7 +81,7 @@ export default function NotesPanel({ contactId }) {
       </div>
       <div className="grid gap-2">
         <textarea
-          className="min-h-20 w-full rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-emerald-400"
+          className="min-h-20 w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-emerald-400"
           placeholder="Add a note..."
           value={draft}
           onChange={(e) => setDraft(e.target.value)}

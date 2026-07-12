@@ -34,6 +34,10 @@ contactSchema.index(
   { owner: 1, googleId: 1 },
   { unique: true, partialFilterExpression: { googleId: { $exists: true } } }
 );
+contactSchema.index(
+  { owner: 1, phone: 1 },
+  { unique: true, partialFilterExpression: { phone: { $gt: '' } } }
+);
 contactSchema.index({ owner: 1, fullName: 'text', email: 'text', phone: 'text' });
 
 module.exports = mongoose.model('Contact', contactSchema);

@@ -42,7 +42,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5">
           <span className="text-lg font-semibold text-white">Personal Address Book</span>
           <nav className="flex items-center gap-3">
-            <Link to="/login" className="rounded-xl px-4 py-2 text-sm font-medium text-slate-200 hover:bg-white/5">
+            <Link to="/login" className="rounded-xl px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800">
               Login
             </Link>
             <Link
@@ -77,14 +77,14 @@ export default function LandingPage() {
               </Link>
               <Link
                 to="/login"
-                className="rounded-xl bg-white/5 px-6 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/10"
+                className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-slate-100 transition hover:bg-slate-800"
               >
                 I already have an account
               </Link>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-glow">
+          <div className="rounded-2xl border border-white/10 bg-slate-900 p-3 shadow-glow">
             <LeafletMap
               center={[16.0544, 108.2022]}
               zoom={12}
@@ -105,7 +105,7 @@ export default function LandingPage() {
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
+                className="rounded-2xl border border-white/10 bg-slate-900 p-6 transition hover:bg-slate-800"
               >
                 <h3 className="text-lg font-semibold text-white">{feature.title}</h3>
                 <p className="mt-2 text-sm text-slate-400">{feature.description}</p>

@@ -16,7 +16,7 @@ export default function RegisterPage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-md items-center px-4">
       <form
-        className="w-full rounded-2xl border border-white/10 bg-white/5 p-6 shadow-glow"
+        className="w-full rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-glow"
         onSubmit={async (e) => {
           e.preventDefault();
           setError('');

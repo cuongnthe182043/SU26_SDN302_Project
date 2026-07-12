@@ -4,7 +4,7 @@ export default function Input({ label, ...props }) {
       <span>{label}</span>
       <input
         {...props}
-        className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 focus:border-emerald-400"
+        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 focus:border-emerald-400"
       />
     </label>
   );

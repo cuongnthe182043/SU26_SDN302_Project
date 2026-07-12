@@ -49,7 +49,7 @@ export default function GroupDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-6">
+      <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-900 p-6">
         <div className="flex items-center gap-3">
           <span className="h-4 w-4 rounded-full" style={{ backgroundColor: group.color }} />
           <h1 className="text-2xl font-semibold text-white">{group.name}</h1>
@@ -65,7 +65,7 @@ export default function GroupDetailPage() {
         </Button>
       </div>
 
-      <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-6">
+      <div className="space-y-3 rounded-2xl border border-white/10 bg-slate-900 p-6">
         <h2 className="text-lg font-semibold text-white">Add Contacts</h2>
         <div className="flex flex-wrap items-center gap-3">
           <div className="min-w-64 flex-1">
@@ -81,7 +81,7 @@ export default function GroupDetailPage() {
               {pickerResults.map((contact) => (
                 <div
                   key={contact._id}
-                  className="flex items-center justify-between rounded-xl border border-white/10 bg-slate-900/60 px-4 py-2"
+                  className="flex items-center justify-between rounded-xl border border-white/10 bg-slate-800 px-4 py-2"
                 >
                   <div>
                     <p className="text-sm text-white">{contact.fullName}</p>
