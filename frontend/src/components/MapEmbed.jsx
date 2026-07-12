@@ -21,7 +21,7 @@ export default function MapEmbed({ contact }) {
       center={[lat, lng]}
       zoom={15}
       className="h-80 w-full"
-      markers={[{ position: [lat, lng], label }]}
+      markers={[{ position: [lat, lng], label, avatarUrl: contact?.avatarUrl }]}
     />
   );
 }

@@ -8,6 +8,8 @@ const {
   createGroup,
   updateGroup,
   deleteGroup,
+  addContactsToGroup,
+  removeContactFromGroup,
 } = require('../controllers/group.controller');
 
 const router = express.Router();
@@ -29,5 +31,13 @@ router.put(
   updateGroup
 );
 router.delete('/:id', protect, deleteGroup);
+router.post(
+  '/:id/contacts',
+  protect,
+  [body('contactIds').isArray({ min: 1 }).withMessage('contactIds must be a non-empty array')],
+  validateRequest,
+  addContactsToGroup
+);
+router.delete('/:id/contacts/:contactId', protect, removeContactFromGroup);
 
 module.exports = router;

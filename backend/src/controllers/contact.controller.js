@@ -12,7 +12,10 @@ const parseBool = (value, fallback = false) => {
 
 const buildSort = (sortBy = 'createdAt', sortOrder = 'desc') => {
   const allowed = new Set(['fullName', 'email', 'phone', 'createdAt', 'updatedAt', 'favorite', 'birthday']);
-  return { [allowed.has(sortBy) ? sortBy : 'createdAt']: sortOrder === 'asc' ? 1 : -1 };
+  const field = allowed.has(sortBy) ? sortBy : 'createdAt';
+  const order = sortOrder === 'asc' ? 1 : -1;
+  if (field === 'favorite') return { favorite: order };
+  return { favorite: -1, [field]: order };
 };
 
 const buildSearchQuery = (search) =>

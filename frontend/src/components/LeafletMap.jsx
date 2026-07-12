@@ -11,6 +11,27 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+const buildAvatarIcon = (avatarUrl) => {
+  const wrapper = document.createElement('div');
+  wrapper.className =
+    'h-10 w-10 overflow-hidden rounded-full border-2 border-emerald-400 bg-slate-800 shadow-lg';
+  const img = document.createElement('img');
+  img.src = avatarUrl;
+  img.alt = '';
+  img.className = 'h-full w-full object-cover';
+  img.onerror = () => {
+    img.style.display = 'none';
+  };
+  wrapper.appendChild(img);
+  return L.divIcon({
+    html: wrapper,
+    className: '',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -24],
+  });
+};
+
 export default function LeafletMap({
   center,
   zoom = 14,
@@ -37,8 +58,8 @@ export default function LeafletMap({
       maxZoom: 19,
     }).addTo(map);
 
-    const leafletMarkers = markers.map(({ position, label }) => {
-      const marker = L.marker(position).addTo(map);
+    const leafletMarkers = markers.map(({ position, label, avatarUrl }) => {
+      const marker = L.marker(position, avatarUrl ? { icon: buildAvatarIcon(avatarUrl) } : undefined).addTo(map);
       if (label) marker.bindPopup(label);
       return marker;
     });

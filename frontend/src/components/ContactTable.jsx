@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
-import { EyeIcon, MapPinIcon, NoSymbolIcon, StarIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, MapPinIcon, NoSymbolIcon, StarIcon, TrashIcon, UserMinusIcon } from '@heroicons/react/24/outline';
 import Button from './Button';
 
 export default function ContactTable({
@@ -8,6 +8,7 @@ export default function ContactTable({
   onDelete,
   onToggleFavorite,
   onToggleBlacklist,
+  onRemoveFromGroup,
   showActions = true,
 }) {
   if (contacts.length === 0) {
@@ -81,6 +82,11 @@ export default function ContactTable({
                     {onToggleBlacklist ? (
                       <Button variant="secondary" onClick={() => onToggleBlacklist(contact._id)}>
                         <NoSymbolIcon className="h-4 w-4" />
+                      </Button>
+                    ) : null}
+                    {onRemoveFromGroup ? (
+                      <Button variant="secondary" onClick={() => onRemoveFromGroup(contact._id)} title="Remove from group">
+                        <UserMinusIcon className="h-4 w-4" />
                       </Button>
                     ) : null}
                     <Button variant="secondary" onClick={() => onDelete(contact._id)}>

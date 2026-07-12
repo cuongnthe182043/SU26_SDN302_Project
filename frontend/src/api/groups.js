@@ -6,4 +6,6 @@ export const groupsApi = {
   create: (payload) => client.post('/groups', payload),
   update: (id, payload) => client.put(`/groups/${id}`, payload),
   remove: (id) => client.delete(`/groups/${id}`),
+  addContacts: (id, contactIds) => client.post(`/groups/${id}/contacts`, { contactIds }),
+  removeContact: (id, contactId) => client.delete(`/groups/${id}/contacts/${contactId}`),
 };

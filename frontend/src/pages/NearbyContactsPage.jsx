@@ -53,6 +53,7 @@ export default function NearbyContactsPage() {
         label: `<strong>${escapeHtml(contact.fullName)}</strong>${
           contact.address ? `<br/>${escapeHtml(contact.address)}` : ''
         }`,
+        avatarUrl: contact.avatarUrl,
       };
     });
 

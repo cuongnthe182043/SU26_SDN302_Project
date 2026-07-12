@@ -54,10 +54,41 @@ const deleteGroup = asyncHandler(async (req, res) => {
   res.json({ message: 'Group deleted' });
 });
 
+const addContactsToGroup = asyncHandler(async (req, res) => {
+  const group = await Group.findOne({ _id: req.params.id, owner: req.user._id });
+  if (!group) throw new AppError('Group not found', 404);
+
+  const contactIds = Array.isArray(req.body.contactIds) ? req.body.contactIds : [];
+  if (contactIds.length === 0) throw new AppError('contactIds is required', 400);
+
+  await Contact.updateMany(
+    { _id: { $in: contactIds }, owner: req.user._id },
+    { $addToSet: { groups: group._id } }
+  );
+
+  const contacts = await Contact.find({ owner: req.user._id, groups: group._id }).sort({ fullName: 1 });
+  res.json({ group, contacts });
+});
+
+const removeContactFromGroup = asyncHandler(async (req, res) => {
+  const group = await Group.findOne({ _id: req.params.id, owner: req.user._id });
+  if (!group) throw new AppError('Group not found', 404);
+
+  await Contact.updateOne(
+    { _id: req.params.contactId, owner: req.user._id },
+    { $pull: { groups: group._id } }
+  );
+
+  const contacts = await Contact.find({ owner: req.user._id, groups: group._id }).sort({ fullName: 1 });
+  res.json({ group, contacts });
+});
+
 module.exports = {
   listGroups,
   getGroup,
   createGroup,
   updateGroup,
   deleteGroup,
+  addContactsToGroup,
+  removeContactFromGroup,
 };
