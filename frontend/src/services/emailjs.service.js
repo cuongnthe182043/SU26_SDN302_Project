@@ -13,7 +13,7 @@ const send = (templateId, templateParams) => {
 };
 
 export const sendPasswordResetEmail = ({ email, name, resetUrl }) =>
-  send(RESET_TEMPLATE_ID, { to_email: email, to_name: name, reset_url: resetUrl });
+  send(RESET_TEMPLATE_ID, { email: email, link: resetUrl });
 
 export const sendWelcomeEmail = ({ email, name }) =>
-  send(WELCOME_TEMPLATE_ID, { to_email: email, to_name: name });
+  send(WELCOME_TEMPLATE_ID, { email: email });
