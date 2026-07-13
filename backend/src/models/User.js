@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema(
     googleId: { type: String, index: true, sparse: true, unique: true },
     googleConnected: { type: Boolean, default: false },
     googleRefreshToken: { type: String, select: false },
+    resetPasswordToken: { type: String, select: false },
+    resetPasswordExpires: { type: Date, select: false },
   },
   { timestamps: true }
 );

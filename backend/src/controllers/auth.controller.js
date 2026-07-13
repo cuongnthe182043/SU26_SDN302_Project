@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
@@ -6,6 +7,8 @@ const AppError = require('../utils/AppError');
 const { signToken } = require('../utils/jwt');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const DEFAULT_GOOGLE_PASSWORD = 'abc123123';
+const RESET_TOKEN_TTL_MS = 15 * 60 * 1000;
 
 const stripUser = (user) => ({
   id: user._id,
@@ -71,24 +74,37 @@ const googleLogin = asyncHandler(async (req, res) => {
     throw new AppError('Google account has no email', 400);
   }
 
-  let user = await User.findOne({ $or: [{ googleId: payload.sub }, { email: payload.email }] });
+  let user = await User.findOne({ $or: [{ googleId: payload.sub }, { email: payload.email }] }).select('+password');
+  let isNewUser = false;
 
   if (user) {
+    let changed = false;
     if (!user.googleId) {
       user.googleId = payload.sub;
+      changed = true;
+    }
+    if (!user.password) {
+      user.password = await bcrypt.hash(DEFAULT_GOOGLE_PASSWORD, 12);
+      changed = true;
+    }
+    if (changed) {
       await user.save();
     }
   } else {
+    const hashedPassword = await bcrypt.hash(DEFAULT_GOOGLE_PASSWORD, 12);
     user = await User.create({
       name: payload.name || payload.email.split('@')[0],
       email: payload.email,
       googleId: payload.sub,
+      password: hashedPassword,
     });
+    isNewUser = true;
   }
 
   res.json({
     token: signToken(user._id),
     user: stripUser(user),
+    isNewUser,
   });
 });
 
@@ -96,4 +112,50 @@ const me = asyncHandler(async (req, res) => {
   res.json({ user: stripUser(req.user) });
 });
 
-module.exports = { register, login, googleLogin, me };
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    res.json({ message: 'If that email is registered, a reset link has been generated.' });
+    return;
+  }
+
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  user.resetPasswordToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+  user.resetPasswordExpires = Date.now() + RESET_TOKEN_TTL_MS;
+  await user.save();
+
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${rawToken}`;
+
+  res.json({
+    message: 'If that email is registered, a reset link has been generated.',
+    resetUrl,
+    email: user.email,
+    name: user.name,
+  });
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpires: { $gt: Date.now() },
+  }).select('+resetPasswordToken +resetPasswordExpires');
+
+  if (!user) {
+    throw new AppError('Reset link is invalid or has expired', 400);
+  }
+
+  user.password = await bcrypt.hash(password, 12);
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  await user.save();
+
+  res.json({ message: 'Password has been reset successfully' });
+});
+
+module.exports = { register, login, googleLogin, me, forgotPassword, resetPassword };

@@ -43,9 +43,14 @@ export default function LoginPage() {
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
           <Button type="submit">Login</Button>
-          <Link className="text-sm text-emerald-300" to="/register">
-            Create account
-          </Link>
+          <div className="flex items-center justify-between">
+            <Link className="text-sm text-emerald-300" to="/register">
+              Create account
+            </Link>
+            <Link className="text-sm text-emerald-300" to="/forgot-password">
+              Forgot password?
+            </Link>
+          </div>
 
           {googleClientId ? (
             <>

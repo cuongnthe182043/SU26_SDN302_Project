@@ -1,6 +1,13 @@
 const express = require('express');
-const { body } = require('express-validator');
-const { googleLogin, login, me, register } = require('../controllers/auth.controller');
+const { body, param } = require('express-validator');
+const {
+  forgotPassword,
+  googleLogin,
+  login,
+  me,
+  register,
+  resetPassword,
+} = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth.middleware');
 const { validateRequest } = require('../middleware/validation.middleware');
 
@@ -32,6 +39,23 @@ router.post(
   [body('credential').notEmpty().withMessage('Google credential is required')],
   validateRequest,
   googleLogin
+);
+
+router.post(
+  '/forgot-password',
+  [body('email').isEmail().withMessage('Valid email is required').normalizeEmail()],
+  validateRequest,
+  forgotPassword
+);
+
+router.post(
+  '/reset-password/:token',
+  [
+    param('token').notEmpty().withMessage('Reset token is required'),
+    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+  ],
+  validateRequest,
+  resetPassword
 );
 
 router.get('/me', protect, me);
