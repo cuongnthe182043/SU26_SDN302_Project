@@ -14,7 +14,18 @@ export default function AppShell() {
             Personal Address Book
           </Link>
           <div className="flex items-center gap-3">
-            <span className="hidden text-sm text-slate-400 sm:block">{user?.name}</span>
+            <Link to="/profile" className="flex items-center gap-2">
+              <span className="hidden text-sm text-slate-400 sm:block">{user?.name}</span>
+              <span className="h-8 w-8 overflow-hidden rounded-full border border-white/10 bg-slate-800">
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center text-xs text-slate-400">
+                    {user?.name ? user.name.charAt(0).toUpperCase() : '?'}
+                  </span>
+                )}
+              </span>
+            </Link>
             <Button
               variant="secondary"
               onClick={() => {
@@ -36,6 +47,7 @@ export default function AppShell() {
               ['/recent', 'Recently'],
               ['/groups', 'Groups'],
               ['/blacklist', 'Blacklist'],
+              ['/profile', 'Profile'],
             ].map(([to, label]) => (
               <NavLink
                 key={to}

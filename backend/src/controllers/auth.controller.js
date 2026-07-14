@@ -15,6 +15,8 @@ const stripUser = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
+  phone: user.phone,
+  avatarUrl: user.avatarUrl,
   googleConnected: user.googleConnected,
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,
@@ -112,6 +114,18 @@ const me = asyncHandler(async (req, res) => {
   res.json({ user: stripUser(req.user) });
 });
 
+const updateProfile = asyncHandler(async (req, res) => {
+  const { name, phone, avatarUrl } = req.body;
+
+  if (name !== undefined) req.user.name = name;
+  if (phone !== undefined) req.user.phone = phone;
+  if (avatarUrl !== undefined) req.user.avatarUrl = avatarUrl;
+
+  await req.user.save();
+
+  res.json({ user: stripUser(req.user) });
+});
+
 const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
@@ -158,4 +172,4 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.json({ message: 'Password has been reset successfully' });
 });
 
-module.exports = { register, login, googleLogin, me, forgotPassword, resetPassword };
+module.exports = { register, login, googleLogin, me, updateProfile, forgotPassword, resetPassword };

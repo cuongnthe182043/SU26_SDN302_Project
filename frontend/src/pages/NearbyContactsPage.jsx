@@ -4,9 +4,11 @@ import ContactTable from '../components/ContactTable';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import LeafletMap from '../components/LeafletMap';
+import useAuth from '../hooks/useAuth';
 import { escapeHtml } from '../utils/escapeHtml';
 
 export default function NearbyContactsPage() {
+  const { user } = useAuth();
   const [coords, setCoords] = useState({ lat: '', lng: '', radius: 5 });
   const [contacts, setContacts] = useState([]);
   const [searched, setSearched] = useState(false);
@@ -44,6 +46,10 @@ export default function NearbyContactsPage() {
     );
   };
 
+  const centerLat = Number(coords.lat);
+  const centerLng = Number(coords.lng);
+  const hasCenter = !Number.isNaN(centerLat) && !Number.isNaN(centerLng) && coords.lat !== '' && coords.lng !== '';
+
   const markers = contacts
     .filter((contact) => contact.location?.coordinates)
     .map((contact) => {
@@ -57,9 +63,13 @@ export default function NearbyContactsPage() {
       };
     });
 
-  const centerLat = Number(coords.lat);
-  const centerLng = Number(coords.lng);
-  const hasCenter = !Number.isNaN(centerLat) && !Number.isNaN(centerLng) && coords.lat !== '' && coords.lng !== '';
+  if (hasCenter) {
+    markers.push({
+      position: [centerLat, centerLng],
+      label: `<strong>${escapeHtml(user?.name || 'You')}</strong><br/>Your current location`,
+      avatarUrl: user?.avatarUrl,
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -77,13 +87,18 @@ export default function NearbyContactsPage() {
             {locating ? 'Locating...' : 'Use my current location'}
           </Button>
           {error ? <span className="ml-3 text-sm text-rose-300">{error}</span> : null}
+          {hasCenter ? (
+            <p className="mt-3 text-sm text-slate-400">
+              Your current location: {centerLat.toFixed(5)}, {centerLng.toFixed(5)}
+            </p>
+          ) : null}
         </div>
       </div>
 
       {searched && markers.length > 0 ? (
         <div className="rounded-2xl border border-white/10 bg-slate-900 p-6">
           <h2 className="mb-4 text-lg font-semibold text-white">
-            {markers.length} contact{markers.length === 1 ? '' : 's'} on the map
+            {contacts.length} contact{contacts.length === 1 ? '' : 's'} found near your location
           </h2>
           <LeafletMap
             center={hasCenter ? [centerLat, centerLng] : undefined}

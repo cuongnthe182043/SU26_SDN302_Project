@@ -14,6 +14,7 @@ import BlacklistPage from '../pages/BlacklistPage';
 import GroupsPage from '../pages/GroupsPage';
 import GroupDetailPage from '../pages/GroupDetailPage';
 import RecentPage from '../pages/RecentPage';
+import ProfilePage from '../pages/ProfilePage';
 
 export default function AppRoutes() {
   return (
@@ -38,6 +39,7 @@ export default function AppRoutes() {
         <Route path="/groups" element={<GroupsPage />} />
         <Route path="/groups/:id" element={<GroupDetailPage />} />
         <Route path="/recent" element={<RecentPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

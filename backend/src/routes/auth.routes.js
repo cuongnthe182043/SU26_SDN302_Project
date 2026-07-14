@@ -7,6 +7,7 @@ const {
   me,
   register,
   resetPassword,
+  updateProfile,
 } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth.middleware');
 const { validateRequest } = require('../middleware/validation.middleware');
@@ -59,5 +60,23 @@ router.post(
 );
 
 router.get('/me', protect, me);
+
+router.put(
+  '/profile',
+  protect,
+  [
+    body('name').optional().trim().notEmpty().withMessage('Name cannot be empty').isLength({ max: 120 }).withMessage('Name must be at most 120 characters'),
+    body('phone')
+      .optional({ values: 'falsy' })
+      .matches(/^[+()0-9.\-\s]{6,20}$/)
+      .withMessage('Phone must be 6-20 characters and contain only digits, spaces, +()-.'),
+    body('avatarUrl')
+      .optional({ values: 'falsy' })
+      .isURL({ require_tld: false })
+      .withMessage('Avatar URL must be a valid URL'),
+  ],
+  validateRequest,
+  updateProfile
+);
 
 module.exports = router;
