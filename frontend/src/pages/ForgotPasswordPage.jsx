@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authApi } from '../api/auth';
-import { sendPasswordResetEmail } from '../services/emailjs.service';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import getErrorMessage from '../utils/getErrorMessage';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -16,15 +16,10 @@ export default function ForgotPasswordPage() {
     setStatus('loading');
 
     try {
-      const { data } = await authApi.forgotPassword(email);
-
-      if (data.resetUrl) {
-        await sendPasswordResetEmail({ email: data.email, name: data.name, resetUrl: data.resetUrl });
-      }
-
+      await authApi.forgotPassword(email);
       setStatus('sent');
-    } catch {
-      setError('Could not send the reset email. Please try again.');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Could not send the reset email. Please try again.'));
       setStatus('idle');
     }
   };

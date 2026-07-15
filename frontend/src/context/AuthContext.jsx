@@ -1,6 +1,5 @@
 import { createContext, useEffect, useState } from 'react';
 import { authApi } from '../api/auth';
-import { sendWelcomeEmail } from '../services/emailjs.service';
 
 export const AuthContext = createContext(null);
 
@@ -58,7 +57,6 @@ export function AuthProvider({ children }) {
     localStorage.setItem('user', JSON.stringify(data.user));
     setToken(data.token);
     setUser(data.user);
-    sendWelcomeEmail(data.user).catch(() => {});
   };
 
   const googleLogin = async (credential) => {
@@ -67,9 +65,6 @@ export function AuthProvider({ children }) {
     localStorage.setItem('user', JSON.stringify(data.user));
     setToken(data.token);
     setUser(data.user);
-    if (data.isNewUser) {
-      sendWelcomeEmail(data.user).catch(() => {});
-    }
   };
 
   const logout = () => {

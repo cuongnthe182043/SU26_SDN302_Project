@@ -2,6 +2,7 @@ const express = require('express');
 const { body } = require('express-validator');
 const { protect } = require('../middleware/auth.middleware');
 const { validateRequest } = require('../middleware/validation.middleware');
+const { NAME_PATTERN, nameCharsMessage } = require('../utils/validators');
 const noteRoutes = require('./note.routes');
 const {
   addressSuggestions,
@@ -44,7 +45,14 @@ router.post(
   '/',
   protect,
   [
-    body('fullName').trim().notEmpty().withMessage('Full name is required').isLength({ max: 120 }).withMessage('Full name must be at most 120 characters'),
+    body('fullName')
+      .trim()
+      .notEmpty()
+      .withMessage('Full name is required')
+      .isLength({ max: 120 })
+      .withMessage('Full name must be at most 120 characters')
+      .matches(NAME_PATTERN)
+      .withMessage(nameCharsMessage('Full name')),
     ...contactFieldRules,
   ],
   validateRequest,
@@ -54,7 +62,13 @@ router.put(
   '/:id',
   protect,
   [
-    body('fullName').optional().trim().isLength({ min: 1, max: 120 }).withMessage('Full name must be between 1 and 120 characters'),
+    body('fullName')
+      .optional()
+      .trim()
+      .isLength({ min: 1, max: 120 })
+      .withMessage('Full name must be between 1 and 120 characters')
+      .matches(NAME_PATTERN)
+      .withMessage(nameCharsMessage('Full name')),
     ...contactFieldRules,
   ],
   validateRequest,

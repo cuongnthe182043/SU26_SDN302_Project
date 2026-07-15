@@ -4,6 +4,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import useAuth from '../hooks/useAuth';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import getErrorMessage from '../utils/getErrorMessage';
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -23,8 +24,8 @@ export default function LoginPage() {
           try {
             await login(form);
             navigate('/dashboard');
-          } catch {
-            setError('Invalid email or password');
+          } catch (err) {
+            setError(getErrorMessage(err, 'Invalid email or password'));
           }
         }}
       >
@@ -68,8 +69,8 @@ export default function LoginPage() {
                     try {
                       await googleLogin(credentialResponse.credential);
                       navigate('/dashboard');
-                    } catch {
-                      setError('Google sign-in failed');
+                    } catch (err) {
+                      setError(getErrorMessage(err, 'Google sign-in failed'));
                     }
                   }}
                   onError={() => setError('Google sign-in failed')}

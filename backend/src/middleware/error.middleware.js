@@ -12,6 +12,14 @@ const errorHandler = (err, _req, res, _next) => {
     return res.status(400).json({ message: 'Invalid resource id' });
   }
 
+  if (err.name === 'TokenExpiredError') {
+    return res.status(401).json({ message: 'Session expired, please log in again' });
+  }
+
+  if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({ message: 'Not authorized' });
+  }
+
   if (err.code === 11000) {
     const duplicateMessages = {
       phone: 'A contact with this phone number already exists',

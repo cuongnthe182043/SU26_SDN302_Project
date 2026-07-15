@@ -27,6 +27,7 @@ export default function DashboardPage() {
       search,
       page,
       limit: 10,
+      blacklisted: 'false',
       sortBy: 'createdAt',
       sortOrder: 'desc',
     });

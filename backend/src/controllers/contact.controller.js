@@ -18,16 +18,22 @@ const buildSort = (sortBy = 'createdAt', sortOrder = 'desc') => {
   return { favorite: -1, [field]: order };
 };
 
-const buildSearchQuery = (search) =>
-  search
-    ? {
-        $or: [
-          { fullName: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } },
-          { phone: { $regex: search, $options: 'i' } },
-        ],
-      }
-    : {};
+// Escape regex metacharacters so a search term is matched literally. Without this
+// a user could inject a pattern (e.g. "(a+)+$") that triggers catastrophic
+// backtracking and stalls the request — a denial-of-service vector.
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const buildSearchQuery = (search) => {
+  if (!search) return {};
+  const safe = escapeRegex(search);
+  return {
+    $or: [
+      { fullName: { $regex: safe, $options: 'i' } },
+      { email: { $regex: safe, $options: 'i' } },
+      { phone: { $regex: safe, $options: 'i' } },
+    ],
+  };
+};
 
 const applyGeo = async (address) => {
   if (!address) return undefined;
@@ -80,7 +86,7 @@ const recentContacts = asyncHandler(async (req, res) => {
   const type = req.query.type === 'added' ? 'added' : 'viewed';
   const limit = Math.min(Math.max(parseInt(req.query.limit || '10', 10), 1), 50);
 
-  const filter = { owner: req.user._id };
+  const filter = { owner: req.user._id, isBlacklisted: { $ne: true } };
   if (type === 'viewed') filter.lastViewedAt = { $exists: true };
 
   const contacts = await Contact.find(filter)
@@ -92,6 +98,12 @@ const recentContacts = asyncHandler(async (req, res) => {
 });
 
 const createContact = asyncHandler(async (req, res) => {
+  const favorite = parseBool(req.body.favorite);
+  const isBlacklisted = parseBool(req.body.isBlacklisted);
+  if (favorite && isBlacklisted) {
+    throw new AppError('A contact cannot be both a favorite and blacklisted', 400);
+  }
+
   const payload = {
     owner: req.user._id,
     fullName: req.body.fullName,
@@ -101,8 +113,8 @@ const createContact = asyncHandler(async (req, res) => {
     birthday: req.body.birthday || null,
     note: req.body.note,
     avatarUrl: req.body.avatarUrl,
-    favorite: parseBool(req.body.favorite),
-    isBlacklisted: parseBool(req.body.isBlacklisted),
+    favorite,
+    isBlacklisted,
     groups: Array.isArray(req.body.groups) ? req.body.groups : undefined,
     source: req.body.source === 'google' ? 'google' : 'local',
     googleId: req.body.googleId,
@@ -127,6 +139,11 @@ const updateContact = asyncHandler(async (req, res) => {
   if (req.body.favorite !== undefined) updates.favorite = parseBool(req.body.favorite, contact.favorite);
   if (req.body.isBlacklisted !== undefined) {
     updates.isBlacklisted = parseBool(req.body.isBlacklisted, contact.isBlacklisted);
+  }
+  const resultingFavorite = updates.favorite !== undefined ? updates.favorite : contact.favorite;
+  const resultingBlacklist = updates.isBlacklisted !== undefined ? updates.isBlacklisted : contact.isBlacklisted;
+  if (resultingFavorite && resultingBlacklist) {
+    throw new AppError('A contact cannot be both a favorite and blacklisted', 400);
   }
   if (Array.isArray(req.body.groups)) updates.groups = req.body.groups;
   if (req.body.birthday !== undefined) updates.birthday = req.body.birthday || null;
@@ -155,6 +172,8 @@ const toggleFavorite = asyncHandler(async (req, res) => {
   const contact = await Contact.findOne({ _id: req.params.id, owner: req.user._id });
   if (!contact) throw new AppError('Contact not found', 404);
   contact.favorite = !contact.favorite;
+  // A contact can't be both — favouriting clears the blacklist flag.
+  if (contact.favorite) contact.isBlacklisted = false;
   await contact.save();
   res.json({ contact });
 });
@@ -163,6 +182,8 @@ const toggleBlacklist = asyncHandler(async (req, res) => {
   const contact = await Contact.findOne({ _id: req.params.id, owner: req.user._id });
   if (!contact) throw new AppError('Contact not found', 404);
   contact.isBlacklisted = !contact.isBlacklisted;
+  // A contact can't be both — blacklisting clears the favourite flag.
+  if (contact.isBlacklisted) contact.favorite = false;
   await contact.save();
   res.json({ contact });
 });
@@ -186,6 +207,7 @@ const nearbyContacts = asyncHandler(async (req, res) => {
   const maxDistance = radius / 6378.1;
   const contacts = await Contact.find({
     owner: req.user._id,
+    isBlacklisted: { $ne: true },
     location: {
       $geoWithin: {
         $centerSphere: [[lng, lat], maxDistance],

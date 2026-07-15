@@ -7,6 +7,7 @@ import { groupsApi } from '../api/groups';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^[+()0-9.\-\s]{6,20}$/;
+const namePattern = /^[^<>]+$/;
 
 export default function ContactForm({ initialValues, onSubmit, submitLabel, bare = false }) {
   const [form, setForm] = useState(initialValues);
@@ -30,7 +31,10 @@ export default function ContactForm({ initialValues, onSubmit, submitLabel, bare
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const validate = () => {
-    if (!form.fullName.trim()) return 'Full name is required';
+    const name = form.fullName.trim();
+    if (!name) return 'Full name is required';
+    if (name.length > 120) return 'Full name must be at most 120 characters';
+    if (!namePattern.test(name)) return 'Full name must not contain the characters < or >';
     if (form.email && !emailPattern.test(form.email)) return 'Email format is invalid';
     if (form.phone && !phonePattern.test(form.phone)) return 'Phone format is invalid';
     return '';
@@ -63,28 +67,39 @@ export default function ContactForm({ initialValues, onSubmit, submitLabel, bare
       <Input label="Phone" value={form.phone} onChange={(e) => update('phone', e.target.value)} />
       <AddressAutocomplete label="Address" value={form.address} onChange={(value) => update('address', value)} />
       <Input label="Birthday" type="date" value={form.birthday} onChange={(e) => update('birthday', e.target.value)} />
-      <label className="block space-y-2 text-sm text-slate-300">
-        <span>Avatar Upload</span>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            setUploading(true);
-            setError('');
-            try {
-              const { data } = await uploadApi.avatar(file);
-              update('avatarUrl', data.url);
-            } catch (uploadError) {
-              setError(uploadError.response?.data?.message || 'Avatar upload failed');
-            } finally {
-              setUploading(false);
-            }
-          }}
-          className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-slate-300"
-        />
-      </label>
+      <div className="flex items-center gap-4">
+        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-emerald-400 bg-slate-800">
+          {form.avatarUrl ? (
+            <img src={form.avatarUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+              {form.fullName ? form.fullName.charAt(0).toUpperCase() : '?'}
+            </div>
+          )}
+        </div>
+        <label className="block flex-1 space-y-2 text-sm text-slate-300">
+          <span>Avatar Upload</span>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              setUploading(true);
+              setError('');
+              try {
+                const { data } = await uploadApi.avatar(file);
+                update('avatarUrl', data.url);
+              } catch (uploadError) {
+                setError(uploadError.response?.data?.message || 'Avatar upload failed');
+              } finally {
+                setUploading(false);
+              }
+            }}
+            className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-slate-300"
+          />
+        </label>
+      </div>
       <label className="block space-y-2 text-sm text-slate-300">
         <span>Note</span>
         <textarea
@@ -93,16 +108,33 @@ export default function ContactForm({ initialValues, onSubmit, submitLabel, bare
           onChange={(e) => update('note', e.target.value)}
         />
       </label>
-      <Input label="Avatar URL" value={form.avatarUrl} onChange={(e) => update('avatarUrl', e.target.value)} />
       <label className="flex items-center gap-3 text-sm text-slate-300">
-        <input type="checkbox" checked={form.favorite} onChange={(e) => update('favorite', e.target.checked)} />
+        <input
+          type="checkbox"
+          checked={form.favorite}
+          onChange={(e) =>
+            setForm((prev) => ({
+              ...prev,
+              favorite: e.target.checked,
+              // A contact can't be both — favouriting clears the blacklist flag.
+              isBlacklisted: e.target.checked ? false : prev.isBlacklisted,
+            }))
+          }
+        />
         Favorite
       </label>
       <label className="flex items-center gap-3 text-sm text-slate-300">
         <input
           type="checkbox"
           checked={form.isBlacklisted}
-          onChange={(e) => update('isBlacklisted', e.target.checked)}
+          onChange={(e) =>
+            setForm((prev) => ({
+              ...prev,
+              isBlacklisted: e.target.checked,
+              // A contact can't be both — blacklisting clears the favourite flag.
+              favorite: e.target.checked ? false : prev.favorite,
+            }))
+          }
         />
         Blacklisted
       </label>

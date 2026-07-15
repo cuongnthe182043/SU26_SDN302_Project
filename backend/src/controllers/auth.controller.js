@@ -5,10 +5,22 @@ const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const { signToken } = require('../utils/jwt');
+const { sendPasswordResetEmail, sendWelcomeEmail } = require('../services/email.service');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const DEFAULT_GOOGLE_PASSWORD = 'abc123123';
 const RESET_TOKEN_TTL_MS = 15 * 60 * 1000;
+
+// Google users authenticate through Google, not with a password. We still store
+// a hashed random secret so the account has a non-guessable password field; if
+// they ever want password login they set one via the forgot-password flow.
+const hashRandomPassword = () => bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12);
+
+// Fire-and-forget: a failed welcome email must never block sign-up.
+const sendWelcomeEmailSafe = (user) => {
+  sendWelcomeEmail({ email: user.email, name: user.name }).catch((err) => {
+    console.error('Failed to send welcome email:', err.message);
+  });
+};
 
 const stripUser = (user) => ({
   id: user._id,
@@ -32,6 +44,8 @@ const register = asyncHandler(async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(password, 12);
   const user = await User.create({ name, email, password: hashedPassword });
+
+  sendWelcomeEmailSafe(user);
 
   res.status(201).json({
     token: signToken(user._id),
@@ -86,14 +100,14 @@ const googleLogin = asyncHandler(async (req, res) => {
       changed = true;
     }
     if (!user.password) {
-      user.password = await bcrypt.hash(DEFAULT_GOOGLE_PASSWORD, 12);
+      user.password = await hashRandomPassword();
       changed = true;
     }
     if (changed) {
       await user.save();
     }
   } else {
-    const hashedPassword = await bcrypt.hash(DEFAULT_GOOGLE_PASSWORD, 12);
+    const hashedPassword = await hashRandomPassword();
     user = await User.create({
       name: payload.name || payload.email.split('@')[0],
       email: payload.email,
@@ -101,6 +115,10 @@ const googleLogin = asyncHandler(async (req, res) => {
       password: hashedPassword,
     });
     isNewUser = true;
+  }
+
+  if (isNewUser) {
+    sendWelcomeEmailSafe(user);
   }
 
   res.json({
@@ -126,12 +144,16 @@ const updateProfile = asyncHandler(async (req, res) => {
   res.json({ user: stripUser(req.user) });
 });
 
+const GENERIC_RESET_MESSAGE = 'If that email is registered, a reset link has been sent to it.';
+
 const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
 
+  // Always return the same response so an attacker cannot tell whether the
+  // email is registered (anti-enumeration).
   if (!user) {
-    res.json({ message: 'If that email is registered, a reset link has been generated.' });
+    res.json({ message: GENERIC_RESET_MESSAGE });
     return;
   }
 
@@ -142,12 +164,14 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${rawToken}`;
 
-  res.json({
-    message: 'If that email is registered, a reset link has been generated.',
-    resetUrl,
-    email: user.email,
-    name: user.name,
-  });
+  try {
+    await sendPasswordResetEmail({ email: user.email, name: user.name, resetUrl });
+  } catch (err) {
+    // Do not leak the failure to the client; log it for operators instead.
+    console.error('Failed to send password reset email:', err.message);
+  }
+
+  res.json({ message: GENERIC_RESET_MESSAGE });
 });
 
 const resetPassword = asyncHandler(async (req, res) => {

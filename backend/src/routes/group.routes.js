@@ -2,6 +2,7 @@ const express = require('express');
 const { body } = require('express-validator');
 const { protect } = require('../middleware/auth.middleware');
 const { validateRequest } = require('../middleware/validation.middleware');
+const { NAME_PATTERN, nameCharsMessage } = require('../utils/validators');
 const {
   listGroups,
   getGroup,
@@ -19,14 +20,33 @@ router.get('/:id', protect, getGroup);
 router.post(
   '/',
   protect,
-  [body('name').trim().notEmpty().withMessage('Group name is required')],
+  [
+    body('name')
+      .trim()
+      .notEmpty()
+      .withMessage('Group name is required')
+      .isLength({ max: 120 })
+      .withMessage('Group name must be at most 120 characters')
+      .matches(NAME_PATTERN)
+      .withMessage(nameCharsMessage('Group name')),
+  ],
   validateRequest,
   createGroup
 );
 router.put(
   '/:id',
   protect,
-  [body('name').optional().trim().notEmpty().withMessage('Group name cannot be empty')],
+  [
+    body('name')
+      .optional()
+      .trim()
+      .notEmpty()
+      .withMessage('Group name cannot be empty')
+      .isLength({ max: 120 })
+      .withMessage('Group name must be at most 120 characters')
+      .matches(NAME_PATTERN)
+      .withMessage(nameCharsMessage('Group name')),
+  ],
   validateRequest,
   updateGroup
 );

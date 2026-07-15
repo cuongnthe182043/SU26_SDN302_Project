@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
+import { StarIcon as StarSolid, NoSymbolIcon as NoSymbolSolid } from '@heroicons/react/24/solid';
 import { EyeIcon, MapPinIcon, NoSymbolIcon, StarIcon, TrashIcon, UserMinusIcon } from '@heroicons/react/24/outline';
 import Button from './Button';
 import ConfirmDialog from './ConfirmDialog';
@@ -96,13 +96,33 @@ export default function ContactTable({
                     >
                       <EyeIcon className="h-4 w-4" /> View
                     </Link>
-                    <Button variant="secondary" onClick={() => onToggleFavorite(contact._id)}>
-                      <StarIcon className="h-4 w-4" />
-                    </Button>
+                    <button
+                      type="button"
+                      aria-pressed={contact.favorite}
+                      title={contact.favorite ? 'Remove from favorites' : 'Add to favorites'}
+                      onClick={() => onToggleFavorite(contact._id)}
+                      className={`inline-flex items-center justify-center rounded-xl px-4 py-3 transition ${
+                        contact.favorite
+                          ? 'bg-amber-400/15 text-amber-300 ring-1 ring-inset ring-amber-300/40 hover:bg-amber-400/25'
+                          : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-100'
+                      }`}
+                    >
+                      {contact.favorite ? <StarSolid className="h-4 w-4" /> : <StarIcon className="h-4 w-4" />}
+                    </button>
                     {onToggleBlacklist ? (
-                      <Button variant="secondary" onClick={() => onToggleBlacklist(contact._id)}>
-                        <NoSymbolIcon className="h-4 w-4" />
-                      </Button>
+                      <button
+                        type="button"
+                        aria-pressed={contact.isBlacklisted}
+                        title={contact.isBlacklisted ? 'Remove from blacklist' : 'Add to blacklist'}
+                        onClick={() => onToggleBlacklist(contact._id)}
+                        className={`inline-flex items-center justify-center rounded-xl px-4 py-3 transition ${
+                          contact.isBlacklisted
+                            ? 'bg-rose-500/15 text-rose-300 ring-1 ring-inset ring-rose-400/40 hover:bg-rose-500/25'
+                            : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-100'
+                        }`}
+                      >
+                        {contact.isBlacklisted ? <NoSymbolSolid className="h-4 w-4" /> : <NoSymbolIcon className="h-4 w-4" />}
+                      </button>
                     ) : null}
                     {onRemoveFromGroup ? (
                       <Button variant="secondary" onClick={() => onRemoveFromGroup(contact._id)} title="Remove from group">

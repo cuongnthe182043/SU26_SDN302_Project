@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
+import { StarIcon as StarSolid, NoSymbolIcon as NoSymbolSolid } from '@heroicons/react/24/solid';
 import { CakeIcon, MapPinIcon, NoSymbolIcon, PencilSquareIcon, PhoneIcon, StarIcon } from '@heroicons/react/24/outline';
 import { contactsApi } from '../api/contacts';
-import Button from '../components/Button';
 import MapEmbed from '../components/MapEmbed';
 import NotesPanel from '../components/NotesPanel';
 import { formatDate } from '../utils/formatDate';
@@ -43,26 +42,40 @@ export default function ContactDetailPage() {
           >
             <PencilSquareIcon className="h-4 w-4" /> Edit
           </Link>
-          <Button
-            variant="secondary"
+          <button
+            type="button"
+            aria-pressed={contact.favorite}
             onClick={async () => {
               await contactsApi.toggleFavorite(contact._id);
               const { data } = await contactsApi.get(contact._id);
               setContact(data.contact);
             }}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition ${
+              contact.favorite
+                ? 'bg-amber-400/15 text-amber-300 ring-1 ring-inset ring-amber-300/40 hover:bg-amber-400/25'
+                : 'bg-slate-800 text-slate-100 hover:bg-slate-700'
+            }`}
           >
-            <StarIcon className="mr-2 h-4 w-4" /> Toggle Favorite
-          </Button>
-          <Button
-            variant="secondary"
+            {contact.favorite ? <StarSolid className="h-4 w-4" /> : <StarIcon className="h-4 w-4" />}
+            {contact.favorite ? 'Favorited' : 'Add to Favorites'}
+          </button>
+          <button
+            type="button"
+            aria-pressed={contact.isBlacklisted}
             onClick={async () => {
               await contactsApi.toggleBlacklist(contact._id);
               const { data } = await contactsApi.get(contact._id);
               setContact(data.contact);
             }}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition ${
+              contact.isBlacklisted
+                ? 'bg-rose-500/15 text-rose-300 ring-1 ring-inset ring-rose-400/40 hover:bg-rose-500/25'
+                : 'bg-slate-800 text-slate-100 hover:bg-slate-700'
+            }`}
           >
-            <NoSymbolIcon className="mr-2 h-4 w-4" /> Toggle Blacklist
-          </Button>
+            {contact.isBlacklisted ? <NoSymbolSolid className="h-4 w-4" /> : <NoSymbolIcon className="h-4 w-4" />}
+            {contact.isBlacklisted ? 'Blacklisted' : 'Add to Blacklist'}
+          </button>
         </div>
       </div>
       <div className="rounded-2xl border border-white/10 bg-slate-900 p-6">
