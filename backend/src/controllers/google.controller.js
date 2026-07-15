@@ -10,6 +10,11 @@ const {
 } = require('../services/google.service');
 const { geocodeAddress } = require('../services/geocoding.service');
 
+// Google returns "invalid_grant" when the refresh token is expired or revoked
+// (e.g. 7-day expiry while the OAuth app is in "Testing", or the user revoked access).
+const isInvalidGrant = (err) =>
+  err?.response?.data?.error === 'invalid_grant' || /invalid_grant/i.test(err?.message || '');
+
 const connect = asyncHandler(async (req, res) => {
   if (!req.user) {
     throw new AppError('Not authorized', 401);
@@ -47,7 +52,21 @@ const sync = asyncHandler(async (req, res) => {
     throw new AppError('Google account is not connected', 400);
   }
 
-  const googleContacts = await fetchGoogleContacts(user.googleRefreshToken);
+  let googleContacts;
+  try {
+    googleContacts = await fetchGoogleContacts(user.googleRefreshToken);
+  } catch (err) {
+    if (isInvalidGrant(err)) {
+      // The stored refresh token no longer works — clear it and ask the user to reconnect.
+      user.googleConnected = false;
+      user.googleRefreshToken = undefined;
+      await user.save();
+      // 400 (not 401) so the frontend's auth interceptor doesn't log the user out of the app.
+      throw new AppError('Google connection has expired. Please connect Google again.', 400);
+    }
+    throw err;
+  }
+
   let imported = 0;
   let skipped = 0;
 
