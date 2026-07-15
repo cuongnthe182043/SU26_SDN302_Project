@@ -116,8 +116,9 @@ const createContact = asyncHandler(async (req, res) => {
     favorite,
     isBlacklisted,
     groups: Array.isArray(req.body.groups) ? req.body.groups : undefined,
-    source: req.body.source === 'google' ? 'google' : 'local',
-    googleId: req.body.googleId,
+    // Manually created contacts are always local; source/googleId are owned by
+    // the Google sync flow and must not be settable by the client.
+    source: 'local',
   };
 
   const location = await applyGeo(payload.address);
@@ -132,7 +133,8 @@ const updateContact = asyncHandler(async (req, res) => {
   if (!contact) throw new AppError('Contact not found', 404);
 
   const updates = {};
-  ['fullName', 'phone', 'email', 'address', 'note', 'avatarUrl', 'source', 'googleId'].forEach((field) => {
+  // source/googleId are managed by the Google sync flow, not user-editable.
+  ['fullName', 'phone', 'email', 'address', 'note', 'avatarUrl'].forEach((field) => {
     if (req.body[field] !== undefined) updates[field] = req.body[field];
   });
 

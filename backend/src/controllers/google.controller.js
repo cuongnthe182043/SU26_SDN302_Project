@@ -49,6 +49,7 @@ const sync = asyncHandler(async (req, res) => {
 
   const googleContacts = await fetchGoogleContacts(user.googleRefreshToken);
   let imported = 0;
+  let skipped = 0;
 
   for (const item of googleContacts) {
     const location = item.address ? await geocodeAddress(item.address) : null;
@@ -65,15 +66,21 @@ const sync = asyncHandler(async (req, res) => {
       location: location ? { type: 'Point', coordinates: [location.longitude, location.latitude] } : undefined,
     };
 
-    await Contact.updateOne(
-      { owner: user._id, googleId: item.googleId },
-      { $set: payload },
-      { upsert: true }
-    );
-    imported += 1;
+    try {
+      await Contact.updateOne(
+        { owner: user._id, googleId: item.googleId },
+        { $set: payload },
+        { upsert: true }
+      );
+      imported += 1;
+    } catch (err) {
+      // Skip a single bad contact (e.g. duplicate phone) instead of aborting the whole sync.
+      console.error(`Skipped Google contact "${item.fullName}":`, err.message);
+      skipped += 1;
+    }
   }
 
-  res.json({ imported });
+  res.json({ imported, skipped });
 });
 
 module.exports = { connect, callback, sync };

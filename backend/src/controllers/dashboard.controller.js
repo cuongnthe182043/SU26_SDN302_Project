@@ -3,7 +3,7 @@ const asyncHandler = require('../utils/asyncHandler');
 
 const getStats = asyncHandler(async (req, res) => {
   const [result] = await Contact.aggregate([
-    { $match: { owner: req.user._id } },
+    { $match: { owner: req.user._id, isBlacklisted: { $ne: true } } },
     {
       $facet: {
         total: [{ $count: 'count' }],
